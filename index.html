@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>脱エルメPJ 現状把握レポート</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@600;700;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green:#1c7d45; --green-bg:#e4f3ea; --green-line:#9dcfb2;
+    --orange:#c25e14; --orange-bg:#fbeada; --orange-line:#e6b481;
+    --blue:#245ea0; --blue-bg:#e6eef9; --blue-line:#a7c2e4;
+    --red:#b12f26; --red-bg:#fbe7e4; --red-line:#e3a49d;
+    --dark:#232631; --dark2:#2e3242;
+    --ink:#232323; --head:#111214; --sub:#555; --line:#cfcabf; --paper:#fff;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#e8e5df;font-family:'Noto Sans JP',sans-serif;color:var(--ink);line-height:1.85;font-size:16px;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1080px;margin:0 auto;background:#fff;box-shadow:0 20px 60px -30px rgba(0,0,0,.4);}
+
+  .hero{background:var(--dark);color:#fff;padding:34px 44px 30px;}
+  .hero .eyebrow{font-size:13px;font-weight:700;letter-spacing:.2em;color:#d8b45e;}
+  .hero h1{margin:12px 0 10px;font-family:'Noto Serif JP',serif;font-size:30px;font-weight:900;line-height:1.35;}
+  .hero p{margin:0;font-size:15px;color:#d5d3cd;max-width:820px;line-height:1.8;}
+  .hero .meta{margin-top:16px;font-size:13px;color:#8f8d86;}
+
+  .tabs{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;background:#171922;border-bottom:3px solid #d8b45e;}
+  .tab{border:0;background:none;cursor:pointer;font-family:'Noto Sans JP',sans-serif;padding:15px 18px;font-size:15px;font-weight:700;color:#9a988f;border-bottom:4px solid transparent;transition:.12s;}
+  .tab:hover{color:#e8e5df;}
+  .tab.active{color:#fff;border-bottom-color:#d8b45e;background:#20222d;}
+
+  .pane{display:none;padding:36px 40px 32px;}
+  .pane.active{display:block;}
+
+  .phead{margin-bottom:28px;}
+  .phead .kicker{font-size:13px;font-weight:700;letter-spacing:.1em;color:var(--orange);}
+  .phead h2{margin:6px 0 8px;font-family:'Noto Serif JP',serif;font-size:26px;font-weight:900;color:var(--head);line-height:1.4;}
+  .phead p{margin:0;font-size:15px;color:#3a3a3a;line-height:1.85;}
+
+  .sec{margin:32px 0 14px;font-family:'Noto Serif JP',serif;font-size:19px;font-weight:900;color:var(--head);border-left:5px solid #d8b45e;padding-left:12px;}
+
+  /* cards */
+  .grid{display:grid;gap:12px;}
+  .g2{grid-template-columns:1fr 1fr;} .g3{grid-template-columns:repeat(3,1fr);} .g4{grid-template-columns:repeat(4,1fr);}
+  @media(max-width:760px){.g2,.g3,.g4{grid-template-columns:1fr;}}
+
+  .card{border:2px solid var(--line);border-radius:9px;padding:16px 18px;background:#fff;}
+  .card .ct{font-size:12px;font-weight:700;letter-spacing:.07em;color:var(--sub);}
+  .card .cn{font-family:'Noto Serif JP',serif;font-size:18px;font-weight:900;color:var(--head);margin:4px 0 8px;}
+  .card .cd{font-size:14px;color:#3a3a3a;line-height:1.7;}
+
+  .badge{display:inline-block;padding:3px 10px;border-radius:4px;font-size:12px;font-weight:800;}
+  .b-green{background:var(--green-bg);color:var(--green);border:1.5px solid var(--green-line);}
+  .b-orange{background:var(--orange-bg);color:var(--orange);border:1.5px solid var(--orange-line);}
+  .b-red{background:var(--red-bg);color:var(--red);border:1.5px solid var(--red-line);}
+  .b-blue{background:var(--blue-bg);color:var(--blue);border:1.5px solid var(--blue-line);}
+  .b-gray{background:#f0f0f0;color:#555;border:1.5px solid #ccc;}
+
+  .call{border-radius:10px;padding:16px 20px;margin:18px 0;border:2px solid;display:flex;gap:14px;align-items:flex-start;}
+  .call.ok{background:var(--green-bg);border-color:var(--green-line);}
+  .call.warn{background:var(--orange-bg);border-color:var(--orange-line);}
+  .call.info{background:var(--blue-bg);border-color:var(--blue-line);}
+  .call .cbadge{flex:none;font-weight:900;font-size:13px;padding:8px 12px;border-radius:7px;color:#fff;text-align:center;line-height:1.3;}
+  .call.ok .cbadge{background:var(--green);}
+  .call.warn .cbadge{background:var(--orange);}
+  .call.info .cbadge{background:var(--blue);}
+  .call .tx{font-size:14.5px;line-height:1.8;color:#2a2a2a;}
+  .call .tx b{color:var(--head);}
+
+  /* next action list */
+  .action-list{list-style:none;margin:0;padding:0;}
+  .action-list li{display:flex;gap:14px;align-items:flex-start;padding:14px 0;border-bottom:1px solid #eee;}
+  .action-list li:last-child{border-bottom:none;}
+  .action-num{flex:none;width:30px;height:30px;border-radius:50%;background:var(--dark);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;font-family:'Noto Serif JP',serif;}
+  .action-body .at{font-weight:900;font-size:15.5px;color:var(--head);}
+  .action-body .ad{font-size:14px;color:#444;line-height:1.7;margin-top:3px;}
+  .action-body .dead{display:inline-block;margin-top:6px;font-size:12px;font-weight:800;padding:2px 8px;border-radius:4px;background:#111;color:#fff;}
+
+  /* table */
+  table.dt{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px;table-layout:fixed;}
+  table.dt th{background:var(--dark2);color:#fff;padding:10px 12px;text-align:left;font-size:13.5px;}
+  table.dt td{border:1px solid #e0e0e0;padding:10px 12px;vertical-align:top;line-height:1.65;word-break:break-word;}
+  table.dt tr:nth-child(even) td{background:#fafafa;}
+  table.dt .hl{font-weight:800;color:var(--head);}
+  table.dt a{color:var(--blue);font-size:12.5px;text-decoration:none;}
+  table.dt a:hover{text-decoration:underline;}
+  /* 列幅の固定 */
+  table.dt.col-2 th:first-child, table.dt.col-2 td:first-child{width:35%;}
+  table.dt.col-3 th:first-child, table.dt.col-3 td:first-child{width:30%;}
+  table.dt.col-3 th:nth-child(2), table.dt.col-3 td:nth-child(2){width:45%;}
+  table.dt.col-4 th:first-child, table.dt.col-4 td:first-child{width:18%;}
+  table.dt.col-4 th:nth-child(2), table.dt.col-4 td:nth-child(2){width:12%;}
+  table.dt.col-4 th:nth-child(3), table.dt.col-4 td:nth-child(3){width:52%;}
+  table.dt.col-4 th:nth-child(4), table.dt.col-4 td:nth-child(4){width:18%;}
+
+  .tag-group{margin-bottom:24px;}
+  .tag-group-title{font-size:13px;font-weight:800;color:#555;letter-spacing:.05em;padding:5px 10px;background:#f4f1ea;border-left:3px solid var(--dark);margin-bottom:8px;}
+
+  .priority-badge{display:inline-block;padding:2px 9px;border-radius:3px;font-size:11.5px;font-weight:800;}
+  .p-high{background:var(--red-bg);color:var(--red);border:1.5px solid var(--red-line);}
+  .p-mid{background:var(--orange-bg);color:var(--orange);border:1.5px solid var(--orange-line);}
+  .p-low{background:var(--blue-bg);color:var(--blue);border:1.5px solid var(--blue-line);}
+
+  footer{background:var(--dark);color:#b7b4ad;padding:20px 44px;font-size:13px;line-height:1.9;}
+  footer b{color:#d8b45e;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">脱エルメPJ ・ SHIFT AI 会員サイト移管</div>
+    <h1>現状把握レポート</h1>
+    <p>エルメで取得・管理している情報の棚卸しと、会員サイトへの移管に向けた現状整理。</p>
+    <div class="meta">作成日: 2026-07-25 ・ 作成者: 山崎陽介 ・ キックオフ: 2026-07-23</div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="p1">① ネクストアクション</button>
+    <button class="tab" data-tab="p2">② フォームデータ</button>
+    <button class="tab" data-tab="p3">③ タグ一覧</button>
+    <button class="tab" data-tab="p4">④ 友だち情報</button>
+    <button class="tab" data-tab="p5">⑤ 必要な機能</button>
+  </nav>
+
+  <!-- P1: ネクストアクション -->
+  <section class="pane active" data-pane="p1">
+    <div class="phead">
+      <div class="kicker">NEXT ACTIONS ／ 今すぐやること</div>
+      <h2>❶❷を確認し、M1（7/27）のスコープ合意に備える</h2>
+      <p>現状把握フェーズで残っている未確認事項と、M1に向けて必要なアクションを整理した。</p>
+    </div>
+
+    <div class="sec">今週中（〜7/27）に完了すること</div>
+    <ul class="action-list">
+      <li>
+        <div class="action-num">1</div>
+        <div class="action-body">
+          <div class="at">栁松さんに会員サイトのBigQueryで同様のデータが取得できるか確認する</div>
+          <div class="ad">旧マイページで取得していたフォームデータは2026年5月頃にストップしており、5月以降のデータの所在が未確認。現在の会員サイトのBigQueryに同様の情報が蓄積されているかを栁松さんに確認し、移植範囲を確定させる。</div>
+          <div class="dead">期限: 7/27</div>
+        </div>
+      </li>
+      <li>
+        <div class="action-num">2</div>
+        <div class="action-body">
+          <div class="at">浦野さん確認待ちのタグを整理する</div>
+          <div class="ad">「新規入会」「サブスクメンバー」「新半年」「SHIFT AI PRO 参加者（20248）」「新新PRO」「新PRO（20244）」の6タグが確認待ち。現存するか・移植が必要かを浦野さんに確認する。また、フロントマーケで管理しているタグの中に会員サイトへインポートすべき情報がないかも合わせて確認する。</div>
+          <div class="dead">期限: 7/27</div>
+        </div>
+      </li>
+      <li>
+        <div class="action-num">3</div>
+        <div class="action-body">
+          <div class="at">西田さんとスコープ合意（M1）</div>
+          <div class="ad">「どの機能が揃えばエルメを止められるか」の最低条件と廃止判断の基準を合意する。1〜2が完了してから臨むのが理想。</div>
+          <div class="dead">期限: 7/27（M1）</div>
+        </div>
+      </li>
+    </ul>
+
+    <div class="sec">M1以降のマイルストーン</div>
+    <div class="grid g4">
+      <div class="card">
+        <div class="ct">M1 ・ 7/27</div>
+        <div class="cn" style="font-size:15px;">スコープ合意</div>
+        <div class="cd">西田さんと移管条件を合意</div>
+      </div>
+      <div class="card">
+        <div class="ct">M2 ・ 8/3</div>
+        <div class="cn" style="font-size:15px;">要件定義書を渡す</div>
+        <div class="cd">要件定義書を開発者へ提出</div>
+      </div>
+      <div class="card">
+        <div class="ct">M3 ・ 8/17</div>
+        <div class="cn" style="font-size:15px;">実装完了</div>
+        <div class="cd">開発者が機能を実装</div>
+      </div>
+      <div class="card">
+        <div class="ct">M4・5 ・ 8/31</div>
+        <div class="cn" style="font-size:15px;">移行→廃止</div>
+        <div class="cd">データ移行・並行稼働を経てエルメ廃止</div>
+      </div>
+    </div>
+
+    <div class="call warn">
+      <div class="cbadge">注意</div>
+      <div class="tx">M1（7/27）が遅れると後続が全部ズレる。上の1〜3の確認を先行して進め、7/27に西田さんとの合意を取れる状態を作ること。</div>
+    </div>
+  </section>
+
+  <!-- P2: フォームデータ -->
+  <section class="pane" data-pane="p2">
+    <div class="phead">
+      <div class="kicker">FORM DATA ／ エルメで取得済みのフォームデータ</div>
+      <h2>フォーム回答履歴は2026年1月まで確認済み。2月以降は未確認。</h2>
+      <p>エルメ上の3フォームについて、取得項目とデータ期間を確認した。移植対象となるデータの範囲を把握するための情報。</p>
+    </div>
+
+    <div class="sec">確認済みのフォームデータ（〜2026年1月）</div>
+    <table class="dt">
+      <thead>
+        <tr><th style="width:25%">フォーム名</th><th style="width:50%">取得項目</th><th style="width:13%">データ期間</th><th style="width:12%">ステータス</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="hl">SHIFTAIの歩き方＿ワーク1</td>
+          <td>1日のAI人材時間 / 1週間のAI人材時間（1日×7）/ 1ヶ月のAI人材時間（1日×30）</td>
+          <td>〜2026年1月</td>
+          <td><span class="badge b-green">確認済み</span></td>
+        </tr>
+        <tr>
+          <td class="hl">SHIFTAIの歩き方＿ワーク2</td>
+          <td>社名 / 部署 / 役職 / 業務内容</td>
+          <td>〜2026年1月</td>
+          <td><span class="badge b-green">確認済み</span></td>
+        </tr>
+        <tr>
+          <td class="hl">入会理由と目標</td>
+          <td>入会理由 / 入会の決め手 / どうなりたいか / どのくらい？ / 目標時給</td>
+          <td>〜2026年1月</td>
+          <td><span class="badge b-green">確認済み</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="sec">旧マイページで取得していたデータ（2026年1月〜2026年5月頃）</div>
+    <div class="call ok">
+      <div class="cbadge">確認済み</div>
+      <div class="tx">エルメのフォームではなく、<b>旧マイページ上のフォーム</b>で取得していたことが判明。取得期間は2026年5月頃まで。以下のフィールドが対象。</div>
+    </div>
+
+    <div style="margin-bottom:8px; font-size:13px; font-weight:700; color:var(--sub);">職業・会社情報</div>
+    <table class="dt" style="margin-bottom:16px;">
+      <thead><tr><th style="width:50%">フィールド名（英）</th><th style="width:50%">内容</th></tr></thead>
+      <tbody>
+        <tr><td class="hl">company_name</td><td>会社名</td></tr>
+        <tr><td class="hl">department</td><td>部署</td></tr>
+        <tr><td class="hl">job_title</td><td>役職</td></tr>
+        <tr><td class="hl">job_description</td><td>業務内容</td></tr>
+        <tr><td class="hl">employment_status</td><td>雇用形態</td></tr>
+      </tbody>
+    </table>
+
+    <div style="margin-bottom:8px; font-size:13px; font-weight:700; color:var(--sub);">入会理由・目標</div>
+    <table class="dt" style="margin-bottom:16px;">
+      <thead><tr><th style="width:50%">フィールド名（英）</th><th style="width:50%">内容</th></tr></thead>
+      <tbody>
+        <tr><td class="hl">join_reason / join_reason_other</td><td>入会理由・その他</td></tr>
+        <tr><td class="hl">join_trigger</td><td>入会の決め手</td></tr>
+        <tr><td class="hl">target_career / target_career_other</td><td>目標キャリア・その他</td></tr>
+        <tr><td class="hl">career_change_careers / career_change_careers_other</td><td>転職先キャリア・その他</td></tr>
+        <tr><td class="hl">skillup_target</td><td>スキルアップ目標</td></tr>
+        <tr><td class="hl">goal_what / goal_how_much / goal_short_term / goal_mid_term</td><td>目標内容・金額・短期・中期目標</td></tr>
+      </tbody>
+    </table>
+
+    <div style="margin-bottom:8px; font-size:13px; font-weight:700; color:var(--sub);">収入・副業情報</div>
+    <table class="dt" style="margin-bottom:16px;">
+      <thead><tr><th style="width:50%">フィールド名（英）</th><th style="width:50%">内容</th></tr></thead>
+      <tbody>
+        <tr><td class="hl">current_hourly_rate / target_hourly_rate</td><td>現在・目標時給</td></tr>
+        <tr><td class="hl">current_monthly_income / target_monthly_income</td><td>現在・目標月収</td></tr>
+        <tr><td class="hl">main_biz_current_hourly_rate / main_biz_target_hourly_rate</td><td>本業の現在・目標時給</td></tr>
+        <tr><td class="hl">main_biz_current_monthly_income / main_biz_target_monthly_income</td><td>本業の現在・目標月収</td></tr>
+        <tr><td class="hl">has_side_job / side_job_description / side_job_platform</td><td>副業有無・内容・プラットフォーム</td></tr>
+      </tbody>
+    </table>
+
+    <div style="margin-bottom:8px; font-size:13px; font-weight:700; color:var(--sub);">AI活用・学習情報</div>
+    <table class="dt" style="margin-bottom:16px;">
+      <thead><tr><th style="width:50%">フィールド名（英）</th><th style="width:50%">内容</th></tr></thead>
+      <tbody>
+        <tr><td class="hl">has_ai_experience</td><td>AI活用経験の有無</td></tr>
+        <tr><td class="hl">ai_usage_goal / ai_usage_after_learning</td><td>AI活用目標・学習後の活用イメージ</td></tr>
+        <tr><td class="hl">daily_ai_learning_hours / weekly_ai_learning_hours / monthly_ai_learning_hours</td><td>1日・週・月あたりのAI学習時間</td></tr>
+      </tbody>
+    </table>
+
+    <div style="margin-bottom:8px; font-size:13px; font-weight:700; color:var(--sub);">時間配分</div>
+    <table class="dt" style="margin-bottom:16px;">
+      <thead><tr><th style="width:50%">フィールド名（英）</th><th style="width:50%">内容</th></tr></thead>
+      <tbody>
+        <tr><td class="hl">current_work_hours / after_work_hours / work_hours</td><td>現在・退勤後・勤務時間</td></tr>
+        <tr><td class="hl">sleep_hours / meal_prep_hours / commute_hours</td><td>睡眠・食事準備・通勤時間</td></tr>
+        <tr><td class="hl">housework_hours / leisure_hours</td><td>家事・余暇時間</td></tr>
+      </tbody>
+    </table>
+
+    <div style="margin-bottom:8px; font-size:13px; font-weight:700; color:var(--sub);">業務改善・キャリア診断</div>
+    <table class="dt" style="margin-bottom:16px;">
+      <thead><tr><th style="width:50%">フィールド名（英）</th><th style="width:50%">内容</th></tr></thead>
+      <tbody>
+        <tr><td class="hl">improvement_target_task / improvement_current_hours / improvement_target_hours</td><td>改善対象業務・現在・目標時間</td></tr>
+        <tr><td class="hl">improvement_reduction_target / improvement_expected_effect</td><td>削減目標・期待効果</td></tr>
+        <tr><td class="hl">career_diagnosis_result</td><td>キャリア診断結果</td></tr>
+      </tbody>
+    </table>
+
+    <div style="margin-bottom:8px; font-size:13px; font-weight:700; color:var(--sub);">将来ビジョン・月次目標</div>
+    <table class="dt" style="margin-bottom:16px;">
+      <thead><tr><th style="width:50%">フィールド名（英）</th><th style="width:50%">内容</th></tr></thead>
+      <tbody>
+        <tr><td class="hl">future_income / future_assets / future_work_hours</td><td>将来の収入・資産・労働時間</td></tr>
+        <tr><td class="hl">future_location / future_relationships / future_emotions</td><td>将来の場所・人間関係・感情</td></tr>
+        <tr><td class="hl">monthly_goal / goal_metrics / required_actions</td><td>月次目標・指標・必要なアクション</td></tr>
+        <tr><td class="hl">time_per_action / total_time_required / available_time</td><td>アクションあたりの時間・合計時間・使える時間</td></tr>
+      </tbody>
+    </table>
+
+    <div class="sec">2026年5月以降（要確認）</div>
+    <div class="call warn">
+      <div class="cbadge">未確認</div>
+      <div class="tx"><b>旧マイページのフォームデータも2026年5月頃にストップしている。</b>5月以降の入会者データがどこに蓄積されているかは未確認。栁松さんに現在の会員サイトのBigQueryに同様のデータがあるか確認する。</div>
+    </div>
+  </section>
+
+  <!-- P3: タグ一覧 -->
+  <section class="pane" data-pane="p3">
+    <div class="phead">
+      <div class="kicker">TAG LIST ／ 移植対象タグの棚卸し</div>
+      <h2>重要タグリスト</h2>
+      <p>タグ管理機能が会員サイトに実装されたのちに優先的にインポートを行う。浦野さん確認待ちのタグは移植判断が保留中。</p>
+    </div>
+
+    <div class="call ok">
+      <div class="cbadge">方針</div>
+      <div class="tx">確定タグはそのまま会員サイトへインポート。名称変更が必要なタグは変更後にインポート。確認待ちタグは浦野さんの回答後に判断する。</div>
+    </div>
+
+    <div class="sec">確定タグ（移植対象）</div>
+
+    <div class="tag-group">
+      <div class="tag-group-title">アクティブ管理</div>
+      <table class="dt">
+        <thead><tr><th style="width:30%">タグ名</th><th style="width:50%">役割</th><th style="width:20%">メモ</th></tr></thead>
+        <tbody>
+          <tr><td class="hl">3ヶ月以内アクティブ</td><td>3ヶ月以内にLINE・旧会員サイトで行動ログがある会員</td><td></td></tr>
+          <tr><td class="hl">1ヶ月以内アクティブ</td><td>1ヶ月以内にLINE・旧会員サイトで行動ログがある会員</td><td></td></tr>
+          <tr><td class="hl">❌3ヶ月以上非アクティブ❌</td><td>3ヶ月以上行動ログなし。配信除外による通数削減＋ノイズ軽減によるアクティブ化</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tag-group">
+      <div class="tag-group-title">退会・クレーム管理</div>
+      <table class="dt">
+        <thead><tr><th style="width:30%">タグ名</th><th style="width:50%">役割</th><th style="width:20%">メモ</th></tr></thead>
+        <tbody>
+          <tr><td class="hl">❌退会者❌</td><td>退会者識別用。配信対象から必ず除外する</td><td></td></tr>
+          <tr><td class="hl">★特例退会者★</td><td>特例退会者の識別</td><td></td></tr>
+          <tr><td class="hl">クレーム歴あり</td><td>クレーム歴の識別</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tag-group">
+      <div class="tag-group-title">配信制御</div>
+      <table class="dt">
+        <thead><tr><th style="width:30%">タグ名</th><th style="width:50%">役割</th><th style="width:20%">メモ</th></tr></thead>
+        <tbody>
+          <tr><td class="hl">🈲：有料配信_除外</td><td>有料イベントの案内を希望しないと答えた会員に付与。配信対象から除外</td><td></td></tr>
+          <tr><td class="hl">初回アンケート【完】</td><td>入会初期アンケートの回答完了者識別。未回答者へのリマインド送付に活用</td><td></td></tr>
+          <tr><td class="hl">初期ガイダンス【完】</td><td>初期ガイダンスが完了し、会員サイトの案内が完了していることを示す</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tag-group">
+      <div class="tag-group-title">プラン識別（名称変更あり）</div>
+      <table class="dt">
+        <thead><tr><th style="width:30%">現タグ名</th><th style="width:40%">役割</th><th style="width:30%">メモ（名称変更予定）</th></tr></thead>
+        <tbody>
+          <tr><td class="hl">月払い</td><td>プラン識別用</td><td>新月払い → 変更予定</td></tr>
+          <tr><td class="hl">年払い</td><td>プラン識別用</td><td>新年払い＋241125〜年払い → 変更予定</td></tr>
+          <tr><td class="hl">生涯学習</td><td>プラン識別用</td><td>新買い切り → 変更予定</td></tr>
+          <tr><td class="hl">W入会</td><td>プラン識別用</td><td>新W入会 → 変更予定</td></tr>
+          <tr><td class="hl">ELITE</td><td>プラン識別用</td><td></td></tr>
+          <tr><td class="hl">PRO</td><td>プラン識別用</td><td>SHIFTAI PRO (202601 以降) → 変更予定</td></tr>
+          <tr><td class="hl">PREMIUM</td><td>プラン識別用</td><td>変更予定</td></tr>
+          <tr><td class="hl">合宿対象</td><td>生涯学習・ELITEの「合宿無料特典」対象識別</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tag-group">
+      <div class="tag-group-title">サポート・イベント管理</div>
+      <table class="dt">
+        <thead><tr><th style="width:30%">現タグ名</th><th style="width:40%">役割</th><th style="width:30%">メモ（名称変更予定）</th></tr></thead>
+        <tbody>
+          <tr><td class="hl">新マンツー_実施済</td><td>マンツー実施者の識別</td><td></td></tr>
+          <tr><td class="hl">新マンツー_予約中</td><td>マンツーの案内対象除外</td><td>新マンツー_予約済 → 変更予定</td></tr>
+          <tr><td class="hl">入学式ー_実施済</td><td>入学式実施者の識別</td><td>入学式参加者 → 変更予定</td></tr>
+          <tr><td class="hl">入学式ー_予約中</td><td>入学式案内対象除外</td><td>入学式_予約済 → 変更予定</td></tr>
+          <tr><td class="hl">Discord参加済み</td><td>Discord参加者の識別</td><td></td></tr>
+          <tr><td class="hl">XXXXXX_XXXX_参加者</td><td>イベント参加者タグ（命名規則: 日付6桁_イベント名_参加者）</td><td>各フォルダから一括移管</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tag-group">
+      <div class="tag-group-title">性別</div>
+      <table class="dt">
+        <thead><tr><th>タグ名</th></tr></thead>
+        <tbody>
+          <tr><td>男性</td></tr><tr><td>女性</td></tr><tr><td>答えない</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sec">確認待ちタグ（浦野さん確認中）</div>
+    <div class="call warn">
+      <div class="cbadge">保留中</div>
+      <div class="tx">以下のタグは現存するか・移植が必要かを浦野さんに確認中。回答後に移植対象リストへ追加する。</div>
+    </div>
+    <table class="dt">
+      <thead><tr><th style="width:40%">タグ名</th><th style="width:60%">確認事項</th></tr></thead>
+      <tbody>
+        <tr><td class="hl">新規入会</td><td>移植が必要か（重要でないかもしれない）</td></tr>
+        <tr><td class="hl">サブスクメンバー</td><td>移植が必要か（重要でないかもしれない）</td></tr>
+        <tr><td class="hl">新半年</td><td>現在も使用しているか</td></tr>
+        <tr><td class="hl">SHIFT AI PRO 参加者（20248）</td><td>現在も使用しているか</td></tr>
+        <tr><td class="hl">新新PRO</td><td>現在も使用しているか</td></tr>
+        <tr><td class="hl">新PRO（20244）</td><td>現在も使用しているか</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- P4: 友だち情報 -->
+  <section class="pane" data-pane="p4">
+    <div class="phead">
+      <div class="kicker">FRIEND INFO ／ 移植対象の友だち情報フィールド</div>
+      <h2>重要友だち情報リスト</h2>
+      <p>友だち情報管理機能が会員サイトに実装されたのちに優先的にインポートを行う。現時点のリストは概要取得のため、完全性は要確認。</p>
+    </div>
+
+    <div class="tag-group" style="margin-top:24px;">
+      <div class="tag-group-title">基本情報</div>
+      <table class="dt">
+        <thead><tr><th style="width:30%">フィールド名</th><th style="width:25%">タイプ</th><th style="width:45%">主な用途</th></tr></thead>
+        <tbody>
+          <tr><td class="hl">氏名（漢字）</td><td>テキスト（短文）</td><td>会員の本名管理</td></tr>
+          <tr><td class="hl">氏名（カナ）</td><td>テキスト（短文）</td><td>会員の本名管理</td></tr>
+          <tr><td class="hl">メールアドレス</td><td>テキスト（短文）</td><td>連絡先</td></tr>
+          <tr><td class="hl">電話番号</td><td>テキスト（短文）</td><td>連絡先</td></tr>
+          <tr><td class="hl">生年月日</td><td>日付</td><td>会員属性</td></tr>
+          <tr><td class="hl">性別</td><td>選択肢（単一）</td><td>会員属性</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tag-group">
+      <div class="tag-group-title">職業情報</div>
+      <table class="dt">
+        <thead><tr><th style="width:30%">フィールド名</th><th style="width:25%">タイプ</th><th style="width:45%">主な用途</th></tr></thead>
+        <tbody>
+          <tr><td class="hl">職種</td><td>選択肢（単一）</td><td>会員属性・セグメント分析</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tag-group">
+      <div class="tag-group-title">ELITEプラン管理</div>
+      <table class="dt">
+        <thead><tr><th style="width:30%">フィールド名</th><th style="width:25%">タイプ</th><th style="width:45%">主な用途</th></tr></thead>
+        <tbody>
+          <tr><td class="hl">サービス開始希望日</td><td>日付</td><td>ELITEプランの開始日管理</td></tr>
+          <tr><td class="hl">サービス満了日</td><td>日付</td><td>ELITEプランの満了日管理</td></tr>
+          <tr><td class="hl">成約用リンクタップ日</td><td>日付</td><td>成約フローの進捗管理</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tag-group">
+      <div class="tag-group-title">退会管理</div>
+      <table class="dt">
+        <thead><tr><th style="width:30%">フィールド名</th><th style="width:25%">タイプ</th><th style="width:45%">主な用途</th></tr></thead>
+        <tbody>
+          <tr><td class="hl">退会申請理由</td><td>テキスト</td><td>退会データの分析</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tag-group">
+      <div class="tag-group-title">マンツー管理</div>
+      <table class="dt">
+        <thead><tr><th style="width:30%">フィールド名</th><th style="width:25%">タイプ</th><th style="width:45%">主な用途</th></tr></thead>
+        <tbody>
+          <tr><td class="hl">最終実施日</td><td>日付</td><td>マンツー最終実施日の管理</td></tr>
+          <tr><td class="hl">実施回数</td><td>数値</td><td>マンツー実施回数の管理</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tag-group">
+      <div class="tag-group-title">ポイント・特典</div>
+      <table class="dt">
+        <thead><tr><th style="width:30%">フィールド名</th><th style="width:25%">タイプ</th><th style="width:45%">主な用途</th></tr></thead>
+        <tbody>
+          <tr><td class="hl">合宿無料券</td><td>数値（ポイント）</td><td>合宿特典の管理</td></tr>
+          <tr><td class="hl">リアイベ無料券</td><td>数値（ポイント）</td><td>リアルイベント特典の管理</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- P5: 必要な機能 -->
+  <section class="pane" data-pane="p5">
+    <div class="phead">
+      <div class="kicker">FEATURES ／ 会員サイトに実装する機能一覧</div>
+      <h2>必要な機能リスト</h2>
+      <p>機能の目的と概要、エルメの該当ページを記載する。</p>
+    </div>
+
+    <div class="sec">優先度：高（これがないとエルメを止められない）</div>
+    <table class="dt">
+      <thead><tr><th style="width:12%">カテゴリ</th><th style="width:16%">機能</th><th style="width:55%">目的</th><th style="width:17%">エルメ参照</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>CRM</td>
+          <td class="hl">タグ管理</td>
+          <td>配信先の絞り込みとデータ分析に使うラベル管理。会員サイトの各ボタンから付与できると◎</td>
+          <td><a href="https://step.lme.jp/basic/tag" target="_blank">タグ管理ページ →</a></td>
+        </tr>
+        <tr>
+          <td>CRM</td>
+          <td class="hl">友だち情報管理<br><span style="font-size:12px;font-weight:400;color:var(--sub);">※会員情報管理</span></td>
+          <td>会員ごとに値を持つ構造化データを管理する。会員サイトの各ボタンタップで付与できると◎</td>
+          <td><a href="https://step.lme.jp/basic/friend-information" target="_blank">友だち情報管理ページ →</a></td>
+        </tr>
+        <tr>
+          <td>CRM</td>
+          <td class="hl">CSV管理</td>
+          <td>会員・タグ・友だち情報の一括インポート/エクスポート</td>
+          <td><a href="https://step.lme.jp/basic/csv-management" target="_blank">CSV管理ページ →</a></td>
+        </tr>
+        <tr>
+          <td>CRM</td>
+          <td class="hl">アクション履歴ログ</td>
+          <td>会員ごとの配信・タグ変更・フォーム回答・イベント参加の履歴を一元表示する</td>
+          <td><a href="https://step.lme.jp/basic/friendlist/my_page/34205556#basic_info" target="_blank">アクション履歴ページ →</a></td>
+        </tr>
+        <tr>
+          <td>配信</td>
+          <td class="hl">プッシュ通知</td>
+          <td>会員がサイトを開いていない状態でもお知らせに気づける状態を作る</td>
+          <td>（会員サイト独自実装）</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="sec">優先度：中（8月中に入れたい）</div>
+    <table class="dt">
+      <thead><tr><th>カテゴリ</th><th>機能</th><th>目的</th><th>エルメ参照</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>配信</td>
+          <td class="hl">メッセージ配信</td>
+          <td>全体または特定グループへのメッセージ一斉送信（セグメント配信含む）</td>
+          <td><a href="https://step.lme.jp/basic/message-send-all" target="_blank">メッセージ配信ページ →</a></td>
+        </tr>
+        <tr>
+          <td>配信</td>
+          <td class="hl">ステップ配信</td>
+          <td>入会日を起点にした自動シナリオ配信</td>
+          <td><a href="https://step.lme.jp/basic/scenario" target="_blank">ステップ配信ページ →</a></td>
+        </tr>
+        <tr>
+          <td>配信</td>
+          <td class="hl">テンプレート作成</td>
+          <td>繰り返し使うメッセージを保存して再利用する</td>
+          <td><a href="https://step.lme.jp/basic/message-template" target="_blank">テンプレートページ →</a></td>
+        </tr>
+        <tr>
+          <td>アンケート</td>
+          <td class="hl">フォーム作成</td>
+          <td>入会時のヒアリングや会員向けアンケートの実施</td>
+          <td><a href="https://step.lme.jp/basic/form-answer" target="_blank">フォーム作成ページ →</a></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="sec">優先度：低（余裕があれば）</div>
+    <table class="dt">
+      <thead><tr><th>カテゴリ</th><th>機能</th><th>目的</th><th>エルメ参照</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>予約</td>
+          <td class="hl">イベント予約</td>
+          <td>有料・無料イベントの予約受付と参加者管理。UnivaPayとの決済連携込み</td>
+          <td><a href="https://step.lme.jp/basic/booking-event-day/list-event" target="_blank">イベント予約ページ →</a></td>
+        </tr>
+        <tr>
+          <td>予約</td>
+          <td class="hl">面談予約</td>
+          <td>1対1の面談枠の管理と予約受付</td>
+          <td><a href="https://step.lme.jp/basic/calendar-salon" target="_blank">面談予約ページ →</a></td>
+        </tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <footer>
+    <b>このレポートの使い方</b> — ①ネクストアクション（何を今すぐやるか）／②フォームデータ（移植範囲の確認）／③タグ一覧（確定タグ・確認待ちタグ）／④友だち情報（フィールド定義）／⑤必要な機能（優先度と参照リンク）<br>
+    作成: 2026-07-25
+  </footer>
+
+</div>
+<script>
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click', function(){
+      var id = t.getAttribute('data-tab');
+      document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
+      document.querySelectorAll('.pane').forEach(function(p){ p.classList.remove('active'); });
+      t.classList.add('active');
+      document.querySelector('.pane[data-pane="'+id+'"]').classList.add('active');
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
+  });
+</script>
+</body>
+</html>
